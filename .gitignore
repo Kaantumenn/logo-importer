@@ -23,6 +23,7 @@
 # misc
 .DS_Store
 *.pem
+*.swp
 
 # debug
 npm-debug.log*
@@ -32,6 +33,18 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
+
+# electron desktop builds
+/release
+/dist
+
+# PWA generated files
+public/sw.js
+public/sw.js.map
+public/swe-worker-*.js
+public/workbox-*.js
+public/workbox-*.js.map
 
 # vercel
 .vercel

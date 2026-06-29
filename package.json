@@ -2,25 +2,96 @@
   "name": "logo-importer",
   "version": "0.1.0",
   "private": true,
+  "description": "AS Çimento Logo çek aktarım masaüstü uygulaması",
+  "author": "Mahmut Kaan Tümen",
+  "main": "electron/main.mjs",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
+    "dev": "next dev --webpack -p 3003",
+    "build": "next build --webpack",
+    "build:standalone": "next build --webpack && node scripts/prepare-standalone.mjs",
+    "build:desktop": "npm run build:standalone",
+    "icons:pwa": "node scripts/generate-pwa-icons.mjs",
+    "start": "next start -p 3003",
+    "desktop": "electron .",
+    "desktop:dev": "concurrently -k \"npm run dev\" \"wait-on http://127.0.0.1:3003 && electron .\"",
+    "pack:win": "npm run build:desktop && electron-builder --win",
+    "pack:win:setup": "npm run build:desktop && electron-builder --win --config.win.target=nsis",
+    "pack:win:portable": "npm run build:desktop && electron-builder --win --config.win.target=portable",
+    "pack:linux": "npm run build:desktop && electron-builder --linux",
+    "pack": "npm run build:desktop && electron-builder --win --linux",
     "lint": "eslint"
   },
   "dependencies": {
+    "@ducanh2912/next-pwa": "^10.2.9",
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.21.0",
+    "mssql": "^12.6.0",
     "next": "16.2.9",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "react-hook-form": "^7.80.0",
+    "sonner": "^2.0.7",
+    "xlsx": "^0.18.5",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/mssql": "^12.3.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "concurrently": "^9.2.1",
+    "electron": "^36.2.0",
+    "electron-builder": "^26.0.12",
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
+    "sharp": "^0.35.2",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wait-on": "^8.0.5"
+  },
+  "build": {
+    "appId": "com.ascimento.logo-importer",
+    "productName": "AS Çimento Çek Aktarım",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "electron/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": ".next/standalone",
+        "to": "app/.next/standalone"
+      },
+      {
+        "from": ".env.example",
+        "to": "app/.env.example"
+      }
+    ],
+    "asar": true,
+    "asarUnpack": [
+      "**/*.node"
+    ],
+    "win": {
+      "target": [
+        "portable",
+        "zip"
+      ],
+      "icon": "public/as_cimento_logo.png"
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "icon": "public/as_cimento_logo.png",
+      "category": "Office"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "shortcutName": "AS Çimento Çek Aktarım"
+    }
   }
 }

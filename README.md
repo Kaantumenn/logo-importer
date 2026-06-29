@@ -1,36 +1,159 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AS Çimento — Çek Aktarım
 
-## Getting Started
+Logo ERP'ye Excel çek aktarımı yapan web uygulaması (Next.js + PWA).
 
-First, run the development server:
+## Vercel'e deploy
+
+1. Projeyi GitHub'a push edin (aşağıya bakın)
+2. [vercel.com](https://vercel.com) → **Add New Project** → GitHub reposunu seçin
+3. **Environment Variables** ekleyin:
+
+| Değişken | Örnek |
+|----------|-------|
+| `DB_HOST` | SQL Server IP (dışarıdan erişilebilir olmalı) |
+| `DB_PORT` | `1433` |
+| `DB_DATABASE` | Logo veritabanı adı |
+| `DB_USER` | SQL kullanıcı |
+| `DB_PASSWORD` | SQL şifre |
+| `DB_ENCRYPT` | `false` |
+| `DB_TRUST_CERT` | `true` |
+
+4. **Deploy** — Build komutu otomatik: `npm run build`
+
+> **Önemli:** Vercel sunucuları bulutta çalışır. SQL Server'ınız sadece iç ağdaysa (localhost / 192.168.x.x) Vercel **bağlanamaz**. Bu durumda:
+> - SQL Server'ı güvenli şekilde dışarı açın, veya
+> - VDS üzerinde `npm run build && npm start` + nginx + HTTPS kullanın (Vercel yerine)
+
+## GitHub'a yükleme
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# GitHub'da yeni boş repo oluşturun: logo-importer
+
+git add .
+git commit -m "Logo çek aktarım uygulaması"
+git remote add origin https://github.com/KULLANICI_ADINIZ/logo-importer.git
+git push -u origin main
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Yerel geliştirme
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm install
+cp .env.example .env.local
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Tarayıcı: http://localhost:3003
 
-## Learn More
+## Gereksinimler
 
-To learn more about Next.js, take a look at the following resources:
+- Node.js 20+
+- SQL Server erişimi (Logo veritabanı)
+- Windows veya Linux masaüstü
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Hızlı başlangıç (geliştirme)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npm install
+cp .env.example .env.local   # veritabanı bilgilerini düzenleyin
+npm run desktop:dev          # Next.js + Electron penceresi
+```
 
-## Deploy on Vercel
+## Masaüstünde çalıştırma
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Windows
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+`scripts/start-desktop.bat` dosyasına çift tıklayın.
+
+İlk çalıştırmada bağımlılıklar yüklenir ve uygulama derlenir.
+
+### Linux / macOS
+
+```bash
+chmod +x scripts/start-desktop.sh
+./scripts/start-desktop.sh
+```
+
+### Manuel
+
+```bash
+npm install
+cp .env.example .env.local
+npm run build:desktop
+npm run desktop
+```
+
+## Kurulum dosyası oluşturma
+
+Projeyi indirip kendi bilgisayarınızda paketleyin:
+
+### Windows (.exe — Linux'tan derlenebilir)
+
+```bash
+npm run pack:win
+```
+
+Çıktı (`release/` klasörü):
+
+- `AS Çimento Çek Aktarım 0.1.0.exe` — taşınabilir, kurulum gerektirmez
+- `AS Çimento Çek Aktarım-0.1.0-win.zip` — zip olarak indirilebilir paket
+
+> **Not:** NSIS kurulum sihirbazı (Setup.exe) Linux'ta **Wine** gerektirir. Kurulum dosyası istiyorsanız Windows'ta `npm run pack:win:setup` çalıştırın.
+
+### Linux (AppImage)
+
+```bash
+npm run pack:linux
+```
+
+## Veritabanı ayarı
+
+`.env.local` dosyasını düzenleyin:
+
+```env
+DB_HOST=192.168.x.x
+DB_PORT=1433
+DB_DATABASE=...
+DB_USER=...
+DB_PASSWORD=...
+DB_ENCRYPT=false
+DB_TRUST_CERT=true
+```
+
+Kurulum sonrası Windows'ta `.env.local` dosyası uygulama klasöründe veya kullanıcı veri dizininde aranır. İlk açılışta `.env.example` kopyalanır.
+
+## PWA (Masaüstüne / Ana ekrana ekle)
+
+Uygulama Progressive Web App olarak kurulabilir.
+
+### Kurulum
+
+1. Production modda çalıştırın: `npm run build && npm start`
+2. Tarayıcıda siteyi açın (Chrome / Edge önerilir)
+3. Sağ üstte **Uygulamayı Yükle** butonuna tıklayın  
+   veya adres çubuğundaki yükle ikonunu kullanın
+
+### Gereksinimler
+
+- **HTTPS** gerekir (localhost hariç). VDS'te HTTP üzerinden yükleme istemi çıkmaz.
+- API istekleri (`/api/*`) her zaman ağ üzerinden gider; offline çalışmaz.
+
+### İkonları yeniden üretmek
+
+```bash
+npm run icons:pwa
+```
+
+## Komutlar
+
+| Komut | Açıklama |
+|-------|----------|
+| `npm run dev` | Web geliştirme sunucusu |
+| `npm run desktop:dev` | Masaüstü penceresi + hot reload |
+| `npm run desktop` | Derlenmiş uygulamayı Electron'da aç |
+| `npm run build:desktop` | Standalone Next.js paketi hazırla |
+| `npm run pack:win` | Windows kurulum dosyası üret |
+
+## İletişim
+
+**Mahmut Kaan Tümen** — 0 (533) 312 88 64
